@@ -64,7 +64,7 @@ public partial class BardView
 
     public BardViewModel Bards { get; } = new();
 
-    private Performer? SelectedBard { get; set; }
+    public Performer? SelectedBard { get; set; }
 
     private void OnPerformerChanged(object? sender, bool e) { UpdateList(); }
     // private void OnTrackNumberChanged(object? sender, TrackNumberChangedEvent e) { UpdateView(); }

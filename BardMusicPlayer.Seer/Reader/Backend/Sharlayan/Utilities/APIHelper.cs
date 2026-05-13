@@ -31,14 +31,15 @@ namespace BardMusicPlayer.Seer.Reader.Backend.Sharlayan.Utilities
 
         public IEnumerable<Signature> GetSignatures()
         {
-            var jsonStream =
-                new MemoryStream(
-                    (byte[])Files.Signatures.Signatures.ResourceManager.GetObject(memoryHandler.GameRegion
-                        .ToString()) ?? Array.Empty<byte>());
+            var resourceBytes =
+                (byte[])Files.Signatures.Signatures.ResourceManager.GetObject(memoryHandler.GameRegion.ToString())
+                ?? (byte[])Files.Signatures.Signatures.ResourceManager.GetObject("Global")
+                ?? Array.Empty<byte>();
+            var jsonStream = new MemoryStream(resourceBytes);
             using var reader = new StreamReader(jsonStream);
             var json = reader.ReadToEnd();
             var signatures = JsonConvert.DeserializeObject<IEnumerable<Signature>>(json, SerializerSettings);
-            var enumerable = signatures as Signature[] ?? signatures.ToArray();
+            var enumerable = signatures as Signature[] ?? signatures?.ToArray() ?? Array.Empty<Signature>();
             foreach (var signature in enumerable) signature.MemoryHandler = memoryHandler;
 
             return enumerable;
@@ -46,10 +47,11 @@ namespace BardMusicPlayer.Seer.Reader.Backend.Sharlayan.Utilities
 
         public StructuresContainer GetStructures()
         {
-            var jsonStream =
-                new MemoryStream(
-                    (byte[])Structures.ResourceManager.GetObject(memoryHandler.GameRegion
-                        .ToString()) ?? Array.Empty<byte>());
+            var resourceBytes =
+                (byte[])Structures.ResourceManager.GetObject(memoryHandler.GameRegion.ToString())
+                ?? (byte[])Structures.ResourceManager.GetObject("Global")
+                ?? Array.Empty<byte>();
+            var jsonStream = new MemoryStream(resourceBytes);
             using var reader = new StreamReader(jsonStream);
             var json = reader.ReadToEnd();
             return JsonConvert.DeserializeObject<StructuresContainer>(json, SerializerSettings);

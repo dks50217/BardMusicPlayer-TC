@@ -272,13 +272,37 @@ namespace BardMusicPlayer.Seer
         {
             try
             {
-                var gameRegion = GameRegion.Global;
-
                 if (File.Exists(GamePath + @"boot\locales\ko.pak"))
-                    gameRegion = GameRegion.Korea;
-                else if (Directory.Exists(GamePath + @"sdo")) gameRegion = GameRegion.China;
+                    return GameRegion.Korea;
 
-                return gameRegion;
+                if (Directory.Exists(GamePath + @"sdo"))
+                    return GameRegion.China;
+
+                // TC (Taiwan): published by USERJOY (宇峻奧汀)
+                // Primary check: registry key written by the USERJOY installer
+                try
+                {
+                    using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Classes\com.userjoy.ffxiv");
+                    if (key != null)
+                        return GameRegion.TC;
+                }
+                catch { /* registry not available, fall through */ }
+
+                // Fallback: install path contains USERJOY
+                if (GamePath.IndexOf("userjoy", StringComparison.OrdinalIgnoreCase) >= 0)
+                    return GameRegion.TC;
+
+                // Fallback: TC client locale file (Traditional Chinese)
+                if (File.Exists(GamePath + @"boot\locales\zh_tw.pak") ||
+                    File.Exists(GamePath + @"boot\locales\zhtw.pak") ||
+                    File.Exists(GamePath + @"boot\locales\zh-tw.pak"))
+                    return GameRegion.TC;
+
+                // Fallback: game folder is named "FINAL FANTASY XIV TC"
+                if (GamePath.IndexOf("FINAL FANTASY XIV TC", StringComparison.OrdinalIgnoreCase) >= 0)
+                    return GameRegion.TC;
+
+                return GameRegion.Global;
             }
             catch (Exception ex)
             {
@@ -290,9 +314,12 @@ namespace BardMusicPlayer.Seer
 
         private string GetConfigPath()
         {
-            var partialConfigPath = GameRegion == GameRegion.Korea
-                ? @"My Games\FINAL FANTASY XIV - KOREA\"
-                : @"My Games\FINAL FANTASY XIV - A Realm Reborn\";
+            var partialConfigPath = GameRegion switch
+            {
+                GameRegion.Korea => @"My Games\FINAL FANTASY XIV - KOREA\",
+                GameRegion.TC    => @"My Games\FINAL FANTASY XIV - TC\",
+                _                => @"My Games\FINAL FANTASY XIV - A Realm Reborn\"
+            };
             var configPath = "";
 
             try
