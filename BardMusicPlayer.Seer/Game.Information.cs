@@ -278,7 +278,7 @@ namespace BardMusicPlayer.Seer
                 if (Directory.Exists(GamePath + @"sdo"))
                     return GameRegion.China;
 
-                // TC (Taiwan): published by USERJOY (宇峻奧汀)
+                // TC (Taiwan)
                 // Primary check: registry key written by the USERJOY installer
                 try
                 {
